@@ -1,0 +1,15 @@
+[
+	{
+		"name": "Test Server",
+		"user": "alejandro",
+		"host": "172.16.56.129",
+		"port": 22
+	},
+	{
+		"name": "Live Server",
+		"user": "ubuntu",
+		"host": "8.8.8.8",
+		"port": 22,
+		"pem": "./file.pem"
+	}
+]
