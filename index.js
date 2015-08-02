@@ -12,7 +12,6 @@ var Connection = require('./lib/Connection');
 var TITLE = '** SSH Manager **';
 var WIDTH = 80;
 
-var argServerId = process.argv[2];
 var servers = [];
 
 // Main code
@@ -26,12 +25,12 @@ function main() {
 
   ServerReader.read(__dirname + '/servers/servers.json', function(err, servs) {
     if (err) {
-      onError(err);
+      console.log(err);
       process.exit(-1);
     }
 
     servers = servs;
-    showMenu();
+    showMenu('Welcome to SSH Manager!');
   });
 }
 
@@ -75,21 +74,15 @@ function showServers(message) {
 }
 
 function readLine() {
-  if (argServerId) {
-    console.log(argServerId);
-    processLine(argServerId);
-    argServerId = null;
-  } else {
-    process.stdin.once('data', processLine);
-  }
+  process.stdin.once('data', processLine);
 }
 
 function processLine(data) {
   var option = data.toString().trim();
 
   if (option === 'quit' || option === 'exit') {
-    quit();
-    return;
+    console.log('Bye!');
+    process.exit(0);
   }
 
   for (var i = 0; i < servers.length; i++) {
@@ -104,18 +97,13 @@ function processLine(data) {
 
 function connect(server) {
   var connection = new Connection(server);
-  connection.connect(function(err) {
-    if (err) { onError(err); }
+  connection.connect(function(code) {
+    var message = 'Connection with "' + server.name + '" closed';
 
-    showMenu('Connection with "' + server.name + '" closed');
+    if (code !== 0) {
+      message += ' with code ' + code;
+    }
+
+    showMenu(message);
   });
-}
-
-function onError(err) {
-  console.log(err);
-}
-
-function quit() {
-  console.log('Bye!');
-  process.exit(0);
 }
