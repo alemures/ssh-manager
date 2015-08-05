@@ -2,9 +2,8 @@ ssh-manager
 ===
 
 TODO:
-	Solve exit when close a connection a type in menu again
-	Ctrl + c in insert password
-	Test connections using pem files
-	How to provide servers.json file
-	Add arguments with features
-	Test in Windows
+	* servers.json or servers.csv
+	* How to provide servers files (argument, default directory, etc)
+	* Add arguments with features (sort servers, connect directly using name or id, provide servers file)
+	* Test in Windows
+	* Test connections using pem files

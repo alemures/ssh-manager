@@ -10,6 +10,6 @@
 		"user": "ubuntu",
 		"host": "8.8.8.8",
 		"port": 22,
-		"pem": "./file.pem"
+		"pem": "servers/file.pem"
 	}
 ]
