@@ -1,7 +1,7 @@
 {
   "name": "ssh-manager",
   "version": "1.0.0",
-  "description": "A very simple ssh connections manager.",
+  "description": "A powerful ssh connections manager.",
   "main": "index.js",
   "files": [
     "index.js",
@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "mocha test/*.js",
-    "watch": "nodemon index.js --watch index.js --watch lib/**/*.js",
+    "watch": "nodemon index.js --watch index.js --watch test/*.js",
     "jshint": "jshint index.js lib/*.js test/*.js",
     "jscs": "jscs index.js lib/*.js test/*.js",
     "check": "npm run test && npm run jshint && npm run jscs"
@@ -26,8 +26,10 @@
   },
   "dependencies": {
     "async": "^1.4.0",
+    "babyparse": "^0.4.3",
     "cli-table": "^0.3.1",
     "colors": "^1.1.2",
-    "ut": "git+https://github.com/alemures/ut.git"
+    "ut": "git+https://github.com/alemures/ut.git",
+    "yargs": "^3.18.0"
   }
 }

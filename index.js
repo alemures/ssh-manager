@@ -4,6 +4,7 @@ var async = require('async');
 var colors = require('colors');
 var ut = require('ut');
 var Table = require('cli-table');
+var argv = require('yargs').argv;
 
 var ServerReader = require('./lib/ServerReader');
 var Connection = require('./lib/Connection');
@@ -12,12 +13,28 @@ var Connection = require('./lib/Connection');
 
 var servers = [];
 
+var headers = {
+  name: 'name',
+  id: 'id',
+  status: 'status',
+  user: 'user',
+  host: 'host',
+  port: 'port',
+  auth: 'auth'
+};
+
 var table = new Table({
-  head: [colors.cyan.bold('name'), colors.cyan.bold('id'), colors.cyan.bold('status'),
-      colors.cyan.bold('user'), colors.cyan.bold('host'), colors.cyan.bold('port'), colors.cyan.bold('auth')],
+  head: [colors.cyan.bold(headers.name), colors.cyan.bold(headers.id), colors.cyan.bold(headers.status),
+      colors.cyan.bold(headers.user), colors.cyan.bold(headers.host), colors.cyan.bold(headers.port), colors.cyan.bold(headers.auth)],
   style: {compact: true, 'padding-left': 1}
 });
 var statusColumn = 2;
+var usedConnectArg = false;
+
+var argFile = argv.f || argv.file;
+var argSort = argv.s || argv.sort;
+var argConnect = argv.c || argv.connect;
+var argPing = argv.p || argv.ping;
 
 // Main code
 
@@ -27,18 +44,46 @@ main();
 
 function main() {
   process.stdin.resume();
+  var files = ['servers.json', 'servers.csv', __dirname + '/servers/servers.json',
+      __dirname + '/servers/servers.csv'];
 
-  ServerReader.read(__dirname + '/servers/servers.json', function(err, servs) {
-    if (err) {
-      console.log(err);
+  if (isValidString(argFile)) {
+    files = [argFile];
+  }
+
+  var errs = [];
+  async.eachSeries(files, function(file, cb) {
+    ServerReader.read(file, function(err, servs) {
+      if (err) {
+        errs.push(err);
+        cb();
+        return;
+      }
+
+      servers = servs;
+
+      if (isValidString(argSort)) {
+        if (headers[argSort] !== undefined) {
+          servers.sort(comparator(argSort));
+        } else {
+          console.log(new Error('Invalid column ' + argSort + ', possibles ' + Object.keys(headers)));
+          process.exit(-1);
+        }
+      }
+
+      populateTable();
+
+      showMenu('Welcome to SSH Manager, type the name or id of a server\nUsing file: ' + file);
+
+      cb('done');
+    });
+  },
+
+  function(err) {
+    if (errs.length === files.length) {
+      console.log(errs);
       process.exit(-1);
     }
-
-    servers = servs;
-
-    populateTable();
-
-    showMenu('Welcome to SSH Manager, type the name or id of a server');
   });
 }
 
@@ -55,6 +100,10 @@ function populateTable() {
 }
 
 function reachableToString(reachable) {
+  if (!argPing) {
+    return '-';
+  }
+
   return reachable ? colors.yellow.bold('up') : colors.red.bold('down');
 }
 
@@ -75,11 +124,16 @@ function updateTable() {
 }
 
 function showMenu(message) {
-  checkServerConnections(function() {
-    updateTable();
+  if (argPing) {
+    checkServerConnections(function() {
+      updateTable();
+      showServers(message);
+      readLine();
+    });
+  } else {
     showServers(message);
     readLine();
-  });
+  }
 }
 
 function checkServerConnections(cb) {
@@ -100,18 +154,25 @@ function showServers(message) {
 }
 
 function readLine() {
-  process.stdin.once('data', processLine);
+  if ((isValidString(argConnect) || ut.isNumber(argConnect)) && !usedConnectArg) {
+    usedConnectArg = true;
+    processLine(argConnect);
+  } else {
+    process.stdin.once('data', processLine);
+  }
 }
 
 function processLine(data) {
   var option = data.toString().trim();
+  var serversLength = servers.length;
+  var i;
 
   if (option === 'quit' || option === 'exit') {
     console.log('Bye!');
     process.exit(0);
   }
 
-  for (var i = 0; i < servers.length; i++) {
+  for (i = 0; i < serversLength; i++) {
     if (servers[i].id === parseInt(option) || servers[i].name.toLowerCase() === option.toLowerCase()) {
       connect(servers[i]);
       return;
@@ -136,4 +197,23 @@ function connect(server) {
 
     showMenu(message);
   });
+}
+
+function comparator(col) {
+  return function(a, b) {
+    var val1 = a[col].toString();
+    var val2 = b[col].toString();
+
+    if (val1 > val2) {
+      return 1;
+    } else if (val1 < val2) {
+      return -1;
+    }
+
+    return 0;
+  };
+}
+
+function isValidString(value) {
+  return ut.isString(value) && value.trim().length > 0;
 }
