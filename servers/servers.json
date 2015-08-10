@@ -2,7 +2,7 @@
 	{
 		"name": "Test Server",
 		"user": "alejandro",
-		"host": "172.16.56.129",
+		"host": "192.168.0.110",
 		"port": 22
 	},
 	{

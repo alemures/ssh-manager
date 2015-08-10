@@ -24,17 +24,34 @@ var headers = {
 };
 
 var table = new Table({
-  head: [colors.cyan.bold(headers.name), colors.cyan.bold(headers.id), colors.cyan.bold(headers.status),
-      colors.cyan.bold(headers.user), colors.cyan.bold(headers.host), colors.cyan.bold(headers.port), colors.cyan.bold(headers.auth)],
+  head: [
+    colors.cyan.bold(headers.name), colors.cyan.bold(headers.id),
+    colors.cyan.bold(headers.status), colors.cyan.bold(headers.user),
+    colors.cyan.bold(headers.host), colors.cyan.bold(headers.port),
+    colors.cyan.bold(headers.auth)
+  ],
   style: {compact: true, 'padding-left': 1}
 });
 var statusColumn = 2;
 var usedConnectArg = false;
 
+// The server file should be a json or csv file
+// with the list of server
 var argFile = argv.f || argv.file;
-var argSort = argv.s || argv.sort;
-var argConnect = argv.c || argv.connect;
-var argPing = argv.p || argv.ping;
+
+// The name of the column to order asc
+var argOrder = argv.o || argv.order;
+
+// The name or id of the server that will use to
+// connect directly without wait for the menu
+var argServer = argv.s || argv.server;
+
+// If is present, disable the server connection checkings
+var argNoCheck = argv.n || argv.nocheck;
+
+// Defines how long the script will wait before to
+// mark the server as 'down' in milliseconds
+var argCheckTimeout = argv.t || argv.timeout || 500;
 
 // Main code
 
@@ -62,11 +79,12 @@ function main() {
 
       servers = servs;
 
-      if (isValidString(argSort)) {
-        if (headers[argSort] !== undefined) {
-          servers.sort(comparator(argSort));
+      if (isValidString(argOrder)) {
+        if (headers[argOrder] !== undefined) {
+          servers.sort(comparator(argOrder));
         } else {
-          console.log(new Error('Invalid column ' + argSort + ', possibles ' + Object.keys(headers)));
+          console.log(new Error('Invalid column ' + argOrder + ', possibles ' +
+              Object.keys(headers)));
           process.exit(-1);
         }
       }
@@ -91,20 +109,27 @@ function populateTable() {
   var serversLength = servers.length;
   var i;
   var server;
+  var portHeaderLength = headers.port.length;
 
   for (i = 0; i < serversLength; i++) {
     server = servers[i];
-    table.push([colors.cyan.bold(server.name), server.id, reachableToString(server.reachable),
-        server.user, server.host, server.port, server.auth.type]);
+    table.push([
+      colors.cyan.bold(server.name), server.id, reachableToString(server.reachable),
+      server.user, server.host, ut.paddingBoth('' + server.port, ' ',
+      portHeaderLength), server.auth.type
+    ]);
   }
 }
 
 function reachableToString(reachable) {
-  if (!argPing) {
-    return '-';
+  var headerLength = headers.status.length;
+
+  if (argNoCheck) {
+    return ut.paddingBoth('-', ' ', headerLength);
   }
 
-  return reachable ? colors.yellow.bold('up') : colors.red.bold('down');
+  return reachable ? colors.yellow.bold(ut.paddingBoth('up', ' ', headerLength)) :
+      colors.red.bold(ut.paddingBoth('down', ' ', headerLength));
 }
 
 function updateTable() {
@@ -124,21 +149,21 @@ function updateTable() {
 }
 
 function showMenu(message) {
-  if (argPing) {
+  if (argNoCheck) {
+    showServers(message);
+    readLine();
+  } else {
     checkServerConnections(function() {
       updateTable();
       showServers(message);
       readLine();
     });
-  } else {
-    showServers(message);
-    readLine();
   }
 }
 
 function checkServerConnections(cb) {
   async.each(servers, function(server, cb) {
-    server.checkConnection(cb);
+    server.checkConnection(argCheckTimeout, cb);
   }, cb);
 }
 
@@ -154,9 +179,9 @@ function showServers(message) {
 }
 
 function readLine() {
-  if ((isValidString(argConnect) || ut.isNumber(argConnect)) && !usedConnectArg) {
+  if ((isValidString(argServer) || ut.isNumber(argServer)) && !usedConnectArg) {
     usedConnectArg = true;
-    processLine(argConnect);
+    processLine(argServer);
   } else {
     process.stdin.once('data', processLine);
   }
@@ -173,7 +198,8 @@ function processLine(data) {
   }
 
   for (i = 0; i < serversLength; i++) {
-    if (servers[i].id === parseInt(option) || servers[i].name.toLowerCase() === option.toLowerCase()) {
+    if (servers[i].id === parseInt(option) ||
+        servers[i].name.toLowerCase() === option.toLowerCase()) {
       connect(servers[i]);
       return;
     }
