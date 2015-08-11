@@ -2,21 +2,7 @@
 	{
 		"name": "Test Server",
 		"user": "alejandro",
-		"host": "192.168.0.110",
-		"port": 22
-	},
-	{
-		"name": "Live Server",
-		"user": "ubuntu",
 		"host": "8.8.8.8",
-		"port": 22,
-		"pem": "servers/file.pem"
-	},
-	{
-		"name": "Fake Server",
-		"user": "fake",
-		"host": "4.3.2.1",
-		"port": 22,
-		"pem": "servers/file.pem"
+		"port": 22
 	}
 ]

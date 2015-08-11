@@ -1,18 +1,22 @@
 {
   "name": "ssh-manager",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A powerful ssh connections manager.",
   "main": "index.js",
   "files": [
     "index.js",
-    "lib"
+    "cli.js",
+    "lib",
+    "servers"
   ],
+  "bin": {"ssh-manager": "lib/cli.js"},
   "scripts": {
     "start": "node index.js",
     "test": "mocha test/*.js",
     "watch": "nodemon index.js --watch index.js --watch test/*.js",
     "jshint": "jshint index.js lib/*.js test/*.js",
     "jscs": "jscs index.js lib/*.js test/*.js",
+    "jscs:fix": "jscs --fix index.js lib/*.js test/*.js",
     "check": "npm run test && npm run jshint && npm run jscs"
   },
   "author": "Alejandro Santiago Nieto",

@@ -61,7 +61,7 @@ main();
 
 function main() {
   process.stdin.resume();
-  var files = ['servers.json', 'servers.csv', __dirname + '/servers/servers.json',
+  var files = [__dirname + '/servers/servers.json',
       __dirname + '/servers/servers.csv'];
 
   if (isValidString(argFile)) {
@@ -72,6 +72,7 @@ function main() {
   async.eachSeries(files, function(file, cb) {
     ServerReader.read(file, function(err, servs) {
       if (err) {
+        err.file = file;
         errs.push(err);
         cb();
         return;
@@ -83,7 +84,7 @@ function main() {
         if (headers[argOrder] !== undefined) {
           servers.sort(comparator(argOrder));
         } else {
-          console.log(new Error('Invalid column ' + argOrder + ', possibles ' +
+          console.error(new Error('Invalid column ' + argOrder + ', possibles ' +
               Object.keys(headers)));
           process.exit(-1);
         }
@@ -98,8 +99,8 @@ function main() {
   },
 
   function(err) {
-    if (errs.length === files.length) {
-      console.log(errs);
+    if (err !== 'done') {
+      console.error(errs);
       process.exit(-1);
     }
   });
