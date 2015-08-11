@@ -1,8 +1,35 @@
 [
 	{
-		"name": "Test Server",
+		"name": "Test Server1",
 		"user": "alejandro",
 		"host": "8.8.8.8",
 		"port": 22
+	},
+	{
+		"name": "Test Server2",
+		"user": "paul",
+		"host": "7.8.8.8",
+		"port": 23,
+		"pem": "file2.pem"
+	},
+	{
+		"name": "Test Server3",
+		"user": "james",
+		"host": "9.8.8.8",
+		"port": 22
+	},
+	{
+		"name": "Test Server6",
+		"user": "ubuntu",
+		"host": "5.8.8.8",
+		"port": 2241,
+		"pem": "file3.pem"
+	},
+	{
+		"name": "Test Server5",
+		"user": "root",
+		"host": "3.8.8.8",
+		"port": 22,
+		"pem": "file4.pem"
 	}
 ]

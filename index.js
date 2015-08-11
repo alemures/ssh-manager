@@ -4,12 +4,14 @@ var async = require('async');
 var colors = require('colors');
 var ut = require('ut');
 var Table = require('cli-table');
-var argv = require('yargs').argv;
+var yargs = require('yargs');
 
 var ServerReader = require('./lib/ServerReader');
 var Connection = require('./lib/Connection');
 
 // Variables
+
+var STATUS_COLUMN_INDEX = 2;
 
 var servers = [];
 
@@ -32,26 +34,41 @@ var table = new Table({
   ],
   style: {compact: true, 'padding-left': 1}
 });
-var statusColumn = 2;
-var usedConnectArg = false;
 
-// The server file should be a json or csv file
-// with the list of server
-var argFile = argv.f || argv.file;
+// Arguments config
 
-// The name of the column to order asc
-var argOrder = argv.o || argv.order;
+var argv = yargs.usage('Usage: $0 [options]')
+    .alias('f', 'file')
+    .nargs('f', 1)
+    .describe('f', 'Provide a json or csv file with servers')
+    .string('f')
 
-// The name or id of the server that will use to
-// connect directly without wait for the menu
-var argServer = argv.s || argv.server;
+    .alias('o', 'order')
+    .nargs('o', 1)
+    .string('o')
+    .choices('o', Object.keys(headers))
+    .describe('o', 'Order the table by the given column')
 
-// If is present, disable the server connection checkings
-var argNoCheck = argv.n || argv.nocheck;
+    .alias('s', 'server')
+    .nargs('s', 1)
+    .string('s')
+    .describe('s', 'Specify the server name or id to connect')
 
-// Defines how long the script will wait before to
-// mark the server as 'down' in milliseconds
-var argCheckTimeout = argv.t || argv.timeout || 500;
+    .alias('n', 'nocheck')
+    .describe('n', 'Disable the server connection checkings')
+    .nargs('n', 0)
+    .boolean('n')
+
+    .alias('t', 'timeout')
+    .nargs('t', 1)
+    .default('t', 500)
+    .describe('t', 'Timeout for server checkings in milliseconds')
+
+    .help('h')
+    .alias('h', 'help')
+    .epilog('https://github.com/alemures')
+    .strict()
+    .argv;
 
 // Main code
 
@@ -64,8 +81,8 @@ function main() {
   var files = [__dirname + '/servers/servers.json',
       __dirname + '/servers/servers.csv'];
 
-  if (isValidString(argFile)) {
-    files = [argFile];
+  if (isValidString(argv.file)) {
+    files = [argv.file];
   }
 
   var errs = [];
@@ -80,14 +97,8 @@ function main() {
 
       servers = servs;
 
-      if (isValidString(argOrder)) {
-        if (headers[argOrder] !== undefined) {
-          servers.sort(comparator(argOrder));
-        } else {
-          console.error(new Error('Invalid column ' + argOrder + ', possibles ' +
-              Object.keys(headers)));
-          process.exit(-1);
-        }
+      if (isValidString(argv.order)) {
+        servers.sort(comparator(argv.order));
       }
 
       populateTable();
@@ -125,7 +136,7 @@ function populateTable() {
 function reachableToString(reachable) {
   var headerLength = headers.status.length;
 
-  if (argNoCheck) {
+  if (argv.nocheck) {
     return ut.paddingBoth('-', ' ', headerLength);
   }
 
@@ -143,14 +154,14 @@ function updateTable() {
     server = servers[i];
     row = table[i];
 
-    if (server.reachable !== row[statusColumn]) {
-      row[statusColumn] = reachableToString(server.reachable);
+    if (server.reachable !== row[STATUS_COLUMN_INDEX]) {
+      row[STATUS_COLUMN_INDEX] = reachableToString(server.reachable);
     }
   }
 }
 
 function showMenu(message) {
-  if (argNoCheck) {
+  if (argv.nocheck) {
     showServers(message);
     readLine();
   } else {
@@ -164,7 +175,7 @@ function showMenu(message) {
 
 function checkServerConnections(cb) {
   async.each(servers, function(server, cb) {
-    server.checkConnection(argCheckTimeout, cb);
+    server.checkConnection(argv.timeout, cb);
   }, cb);
 }
 
@@ -180,9 +191,9 @@ function showServers(message) {
 }
 
 function readLine() {
-  if ((isValidString(argServer) || ut.isNumber(argServer)) && !usedConnectArg) {
-    usedConnectArg = true;
-    processLine(argServer);
+  if (isValidString(argv.server)) {
+    processLine(argv.server);
+    argv.server = null;
   } else {
     process.stdin.once('data', processLine);
   }
