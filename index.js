@@ -3,7 +3,7 @@
 var async = require('async');
 var colors = require('colors');
 var Table = require('cli-table');
-var ut = require('ut');
+var ut = require('utjs');
 var yargs = require('yargs');
 
 var ServerReader = require('./lib/ServerReader');
