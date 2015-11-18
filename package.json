@@ -1,6 +1,6 @@
 {
   "name": "ssh-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A powerful ssh connections manager.",
   "main": "index.js",
   "files": [
@@ -8,7 +8,9 @@
     "lib",
     "servers"
   ],
-  "bin": {"ssh-manager": "lib/cli.js"},
+  "bin": {
+    "ssh-manager": "lib/cli.js"
+  },
   "scripts": {
     "start": "node index.js",
     "test": "mocha test/*.js",
@@ -32,7 +34,7 @@
     "babyparse": "^0.4.3",
     "cli-table": "^0.3.1",
     "colors": "^1.1.2",
-    "ut": "git+https://github.com/alemures/ut.git",
+    "utjs": "^1.0.8",
     "yargs": "^3.18.0"
   }
 }
