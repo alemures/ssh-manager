@@ -1,6 +1,6 @@
 {
   "name": "ssh-manager",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A powerful ssh connections manager.",
   "main": "index.js",
   "files": [
