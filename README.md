@@ -4,7 +4,7 @@ ssh-manager
 A powerful ssh connections manager.
 
 ### Install
-npm install -g https://github.com/alemures/ssh-manager
+npm install ssh-manager -g
 
 ### Configuration
 Start the script with `ssh-manager` and you will see it running with few sample servers, to add yours,
