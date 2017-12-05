@@ -32,6 +32,7 @@
   "dependencies": {
     "async": "^1.4.0",
     "babyparse": "^0.4.3",
+    "child_pty": "^3.0.7",
     "cli-table": "^0.3.1",
     "colors": "^1.1.2",
     "utjs": "^1.0.8",
