@@ -13,28 +13,28 @@ you have to create a configuration file with **json** or **csv** extension with 
 JSON file:
 ```
 [
-	{
-		"name": "Test Server1",
-		"user": "alejandro",
-		"host": "8.8.8.8",
-		"port": 22
-	},
-	{
-		"name": "Test Server2",
-		"user": "paul",
-		"host": "7.8.8.8",
-		"port": 23,
-		"pem": "./file2.pem"
-	}
+  {
+    "name": "Test Server1",
+    "user": "alejandro",
+    "host": "8.8.8.8"
+  },
+  {
+    "name": "Test Server2",
+    "user": "paul",
+    "host": "7.8.8.8",
+    "port": 23,
+    "pem": "./file2.pem"
+    }
 ]
 ```
 
 CSV file:
 ```
 name,user,host,port,pem
-Test Server1,alejandro,8.8.8.8,22,
+Test Server1,alejandro,8.8.8.8
 Test Server2,paul,7.8.8.8,23,./file2.pem
 ```
+> *port* and *pem* are optional fields.
 
 Once you have your file ready you can provide it with the option `-f` or `--file`.
 

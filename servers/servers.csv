@@ -1,6 +1,6 @@
 name,user,host,port,pem
-Test Server1,alejandro,8.8.8.8,22,
+Test Server1,alejandro,8.8.8.8
 Test Server2,paul,7.8.8.8,23,file2.pem
-Test Server3,james,9.8.8.8,22,
+Test Server3,james,9.8.8.8,22
 Test Server6,ubuntu,5.8.8.8,2241,file3.pem
 Test Server5,root,3.8.8.8,22,file4.pem
