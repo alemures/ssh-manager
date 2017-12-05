@@ -32,7 +32,7 @@ var table = new Table({
     colors.cyan.bold(headers.host), colors.cyan.bold(headers.port),
     colors.cyan.bold(headers.auth)
   ],
-  style: {compact: true, 'padding-left': 1}
+  style: { compact: true, 'padding-left': 1 }
 });
 
 // Arguments config
@@ -86,8 +86,8 @@ function main() {
   }
 
   var errs = [];
-  async.eachSeries(files, function(file, cb) {
-    ServerReader.read(file, function(err, servs) {
+  async.eachSeries(files, function (file, cb) {
+    ServerReader.read(file, function (err, servs) {
       if (err) {
         err.file = file;
         errs.push(err);
@@ -109,7 +109,7 @@ function main() {
     });
   },
 
-  function(err) {
+  function (err) {
     if (err !== 'done') {
       console.error(errs);
       process.exit(-1);
@@ -165,7 +165,7 @@ function showMenu(message) {
     showServers(message);
     readLine();
   } else {
-    checkServerConnections(function() {
+    checkServerConnections(function () {
       updateTable();
       showServers(message);
       readLine();
@@ -174,7 +174,7 @@ function showMenu(message) {
 }
 
 function checkServerConnections(cb) {
-  async.each(servers, function(server, cb) {
+  async.each(servers, function (server, cb) {
     server.checkConnection(argv.timeout, cb);
   }, cb);
 }
@@ -222,7 +222,7 @@ function processLine(data) {
 
 function connect(server) {
   var connection = new Connection(server);
-  connection.connect(function(code, signal) {
+  connection.connect(function (code, signal) {
     var message;
 
     if (ut.isNumber(code)) {
@@ -238,7 +238,7 @@ function connect(server) {
 }
 
 function comparator(col) {
-  return function(a, b) {
+  return function (a, b) {
     var val1 = a[col].toString();
     var val2 = b[col].toString();
 
