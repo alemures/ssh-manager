@@ -223,14 +223,10 @@ function processLine(data) {
 function connect(server) {
   var connection = new Connection(server);
   connection.connect(function (code, signal) {
-    var message;
+    var message = 'Connection to "' + server.name + '" closed with code ' + code;
 
-    if (ut.isNumber(code)) {
-      // Process exited normally
-      message = 'Connection to "' + server.name + '" closed with code ' + code;
-    } else {
-      // Process killed by parent
-      message = 'Connection to "' + server.name + '" killed by parent with signal ' + signal;
+    if (signal) {
+      message += ' and signal ' + signal;
     }
 
     showMenu(message);
