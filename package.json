@@ -14,6 +14,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "mocha test/*.js",
+    "test:cover": "nyc --reporter=lcov --reporter=text-summary npm test",
     "lint": "eslint index.js lib/*.js test/*.js",
     "lint:fix": "eslint index.js lib/*.js test/*.js --fix",
     "check": "npm test && npm run lint && npm outdated"
@@ -25,16 +26,17 @@
     "eslint": "^7.13.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
-    "mocha": "^8.2.1"
+    "mocha": "^8.2.1",
+    "nyc": "^15.1.0"
   },
   "dependencies": {
-    "async": "2.x.x",
+    "async": "^3.2.0",
     "cli-table": "0.3.x",
     "colors": "1.x.x",
     "node-pty": "^0.9.0",
-    "papaparse": "4.x.x",
-    "utjs": "2.x.x",
-    "yargs": "10.x.x"
+    "papaparse": "^5.3.0",
+    "utjs": "^3.0.0",
+    "yargs": "^16.1.1"
   },
   "repository": {
     "type": "git",
