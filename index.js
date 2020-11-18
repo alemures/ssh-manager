@@ -1,74 +1,72 @@
-'use strict';
+const async = require('async');
+const colors = require('colors');
+const path = require('path');
+const Table = require('cli-table');
+const ut = require('utjs');
+const yargs = require('yargs');
 
-var async = require('async');
-var colors = require('colors');
-var Table = require('cli-table');
-var ut = require('utjs');
-var yargs = require('yargs');
-
-var ServerReader = require('./lib/ServerReader');
-var Connection = require('./lib/Connection');
+const ServerReader = require('./lib/ServerReader');
+const Connection = require('./lib/Connection');
 
 // Variables
 
-var STATUS_COLUMN_INDEX = 2;
+const STATUS_COLUMN_INDEX = 2;
 
-var servers = [];
+let servers = [];
 
-var headers = {
+const headers = {
   name: 'name',
   id: 'id',
   status: 'status',
   user: 'user',
   host: 'host',
   port: 'port',
-  auth: 'auth'
+  auth: 'auth',
 };
 
-var table = new Table({
+const table = new Table({
   head: [
     colors.cyan.bold(headers.name), colors.cyan.bold(headers.id),
     colors.cyan.bold(headers.status), colors.cyan.bold(headers.user),
     colors.cyan.bold(headers.host), colors.cyan.bold(headers.port),
-    colors.cyan.bold(headers.auth)
+    colors.cyan.bold(headers.auth),
   ],
-  style: { compact: true, 'padding-left': 1 }
+  style: { compact: true, 'padding-left': 1 },
 });
 
 // Arguments config
 
-var argv = yargs.usage('Usage: $0 [options]')
-    .alias('f', 'file')
-    .nargs('f', 1)
-    .describe('f', 'Provide a json or csv file with servers')
-    .string('f')
+const { argv } = yargs.usage('Usage: $0 [options]')
+  .alias('f', 'file')
+  .nargs('f', 1)
+  .describe('f', 'Provide a json or csv file with servers')
+  .string('f')
 
-    .alias('o', 'order')
-    .nargs('o', 1)
-    .string('o')
-    .choices('o', Object.keys(headers))
-    .describe('o', 'Order the table by the given column')
+  .alias('o', 'order')
+  .nargs('o', 1)
+  .string('o')
+  .choices('o', Object.keys(headers))
+  .describe('o', 'Order the table by the given column')
 
-    .alias('s', 'server')
-    .nargs('s', 1)
-    .string('s')
-    .describe('s', 'Specify the server name or id to connect')
+  .alias('s', 'server')
+  .nargs('s', 1)
+  .string('s')
+  .describe('s', 'Specify the server name or id to connect')
 
-    .alias('n', 'nocheck')
-    .describe('n', 'Disable the server connection checkings')
-    .nargs('n', 0)
-    .boolean('n')
+  .alias('n', 'nocheck')
+  .describe('n', 'Disable the server connection checkings')
+  .nargs('n', 0)
+  .boolean('n')
 
-    .alias('t', 'timeout')
-    .nargs('t', 1)
-    .default('t', 500)
-    .describe('t', 'Timeout for server checkings in milliseconds')
+  .alias('t', 'timeout')
+  .nargs('t', 1)
+  .default('t', 500)
+  .describe('t', 'Timeout for server checkings in milliseconds')
 
-    .help('h')
-    .alias('h', 'help')
-    .epilog('https://github.com/alemures')
-    .strict()
-    .argv;
+  .help('h')
+  .alias('h', 'help')
+  .epilog('https://github.com/alemures')
+  .strict();
 
 // Main code
 
@@ -78,18 +76,17 @@ main();
 
 function main() {
   process.stdin.resume();
-  var files = [__dirname + '/servers/servers.json',
-      __dirname + '/servers/servers.csv'];
+  let files = [path.join(__dirname, '/servers/servers.json'),
+    path.join(__dirname, '/servers/servers.csv')];
 
   if (isValidString(argv.file)) {
     files = [argv.file];
   }
 
-  var errs = [];
-  async.eachSeries(files, function (file, cb) {
-    ServerReader.read(file, function (err, servs) {
+  const errs = [];
+  async.eachSeries(files, (file, cb) => {
+    ServerReader.read(file, (err, servs) => {
       if (err) {
-        err.file = file;
         errs.push(err);
         cb();
         return;
@@ -103,13 +100,13 @@ function main() {
 
       populateTable();
 
-      showMenu('Welcome to SSH Manager, type the name or id of a server\nUsing file: ' + file);
+      showMenu(`Welcome to SSH Manager, type the name or id of a server\nUsing file: ${file}`);
 
       cb('done');
     });
   },
 
-  function (err) {
+  (err) => {
     if (err !== 'done') {
       console.error(errs);
       process.exit(-1);
@@ -118,46 +115,35 @@ function main() {
 }
 
 function populateTable() {
-  var serversLength = servers.length;
-  var i;
-  var server;
-  var portHeaderLength = headers.port.length;
+  const portHeaderLength = headers.port.length;
 
-  for (i = 0; i < serversLength; i++) {
-    server = servers[i];
+  servers.forEach((server) => {
     table.push([
       colors.cyan.bold(server.name), server.id, reachableToString(server.reachable),
-      server.user, server.host, ut.paddingBoth('' + server.port, ' ',
-      portHeaderLength), server.auth.type
+      server.user, server.host, ut.paddingBoth(String(server.port), ' ', portHeaderLength), server.auth.type,
     ]);
-  }
+  });
 }
 
 function reachableToString(reachable) {
-  var headerLength = headers.status.length;
+  const headerLength = headers.status.length;
 
   if (argv.nocheck) {
     return ut.paddingBoth('-', ' ', headerLength);
   }
 
-  return reachable ? colors.yellow.bold(ut.paddingBoth('up', ' ', headerLength)) :
-      colors.red.bold(ut.paddingBoth('down', ' ', headerLength));
+  return reachable ? colors.yellow.bold(ut.paddingBoth('up', ' ', headerLength))
+    : colors.red.bold(ut.paddingBoth('down', ' ', headerLength));
 }
 
 function updateTable() {
-  var serversLength = servers.length;
-  var i;
-  var server;
-  var row;
-
-  for (i = 0; i < serversLength; i++) {
-    server = servers[i];
-    row = table[i];
+  servers.forEach((server, i) => {
+    const row = table[i];
 
     if (server.reachable !== row[STATUS_COLUMN_INDEX]) {
       row[STATUS_COLUMN_INDEX] = reachableToString(server.reachable);
     }
-  }
+  });
 }
 
 function showMenu(message) {
@@ -165,7 +151,7 @@ function showMenu(message) {
     showServers(message);
     readLine();
   } else {
-    checkServerConnections(function () {
+    checkServerConnections(() => {
       updateTable();
       showServers(message);
       readLine();
@@ -174,8 +160,8 @@ function showMenu(message) {
 }
 
 function checkServerConnections(cb) {
-  async.each(servers, function (server, cb) {
-    server.checkConnection(argv.timeout, cb);
+  async.each(servers, (server, internalCb) => {
+    server.checkConnection(argv.timeout, internalCb);
   }, cb);
 }
 
@@ -185,7 +171,7 @@ function showServers(message) {
 
   console.log(table.toString());
 
-  console.log('LOG -> ' + colors.gray(message ? message : ''));
+  console.log(`LOG -> ${colors.gray(message || '')}`);
   console.log('');
   process.stdout.write('Choose a server: ');
 }
@@ -200,37 +186,30 @@ function readLine() {
 }
 
 function processLine(data) {
-  var option = data.toString().trim();
-  var serversLength = servers.length;
-  var i;
+  const option = data.toString().trim();
 
   if (option === 'quit' || option === 'exit') {
     console.log('Bye!');
     process.exit(0);
   }
 
-  for (i = 0; i < serversLength; i++) {
-    if (servers[i].id === parseInt(option) ||
-        servers[i].name.toLowerCase() === option.toLowerCase()) {
-      connect(servers[i]);
-      return;
-    }
-  }
+  const server = servers.find((serv) => serv.id === parseInt(option, 10)
+    || serv.name.toLowerCase() === option.toLowerCase());
 
-  showMenu('The server "' + option + '" doesn\'t exist');
+  if (server) {
+    connect(server);
+  } else {
+    showMenu(`The server "${option}" doesn't exist`);
+  }
 }
 
 function connect(server) {
-  var connection = new Connection(server);
-  connection.connect(function (code, signal) {
-    var message;
+  const connection = new Connection(server);
+  connection.connect((code, signal) => {
+    let message = `Connection to "${server.name}" closed with code ${code}'`;
 
-    if (ut.isNumber(code)) {
-      // Process exited normally
-      message = 'Connection to "' + server.name + '" closed with code ' + code;
-    } else {
-      // Process killed by parent
-      message = 'Connection to "' + server.name + '" killed by parent with signal ' + signal;
+    if (signal) {
+      message += ` and signal ${signal}`;
     }
 
     showMenu(message);
@@ -238,13 +217,15 @@ function connect(server) {
 }
 
 function comparator(col) {
-  return function (a, b) {
-    var val1 = a[col].toString();
-    var val2 = b[col].toString();
+  return (a, b) => {
+    const val1 = a[col].toString();
+    const val2 = b[col].toString();
 
     if (val1 > val2) {
       return 1;
-    } else if (val1 < val2) {
+    }
+
+    if (val1 < val2) {
       return -1;
     }
 
