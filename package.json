@@ -14,25 +14,24 @@
   "scripts": {
     "start": "node index.js",
     "test": "mocha test/*.js",
-    "jshint": "jshint index.js lib/*.js test/*.js",
-    "jscs": "jscs index.js lib/*.js test/*.js",
-    "jscs:fix": "jscs --fix index.js lib/*.js test/*.js",
-    "check": "npm run test && npm run jshint && npm run jscs"
+    "lint": "eslint index.js lib/*.js test/*.js",
+    "lint:fix": "eslint index.js lib/*.js test/*.js --fix",
+    "check": "npm test && npm run lint && npm outdated"
   },
   "author": "Alejandro Santiago Nieto",
   "license": "MIT",
   "devDependencies": {
-    "chai": "4.x.x",
-    "jscs": "3.x.x",
-    "jshint": "2.x.x",
-    "mocha": "4.x.x"
+    "chai": "^4.2.0",
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.2.1"
   },
   "dependencies": {
     "async": "2.x.x",
-    "papaparse": "4.x.x",
-    "child_pty": "3.x.x",
     "cli-table": "0.3.x",
     "colors": "1.x.x",
+    "papaparse": "4.x.x",
     "utjs": "2.x.x",
     "yargs": "10.x.x"
   },
