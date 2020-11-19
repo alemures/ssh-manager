@@ -190,7 +190,7 @@ function processLine(data) {
 function connect(server) {
   const connection = new Connection(server);
   connection.connect((code, signal) => {
-    let message = `Connection to "${server.name}" closed with code ${code}'`;
+    let message = `Connection to "${server.name}" closed with code ${code}`;
 
     if (signal) {
       message += ` and signal ${signal}`;
