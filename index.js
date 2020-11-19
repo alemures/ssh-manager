@@ -76,41 +76,25 @@ main();
 
 function main() {
   process.stdin.resume();
-  let files = [path.join(__dirname, '/servers/servers.json'),
-    path.join(__dirname, '/servers/servers.csv')];
+  const file = isValidString(argv.file)
+    ? path.resolve(argv.file)
+    : path.join(__dirname, 'servers/servers.json');
 
-  if (isValidString(argv.file)) {
-    files = [argv.file];
-  }
-
-  const errs = [];
-  async.eachSeries(files, (file, cb) => {
-    ServerReader.read(file, (err, servs) => {
-      if (err) {
-        errs.push(err);
-        cb();
-        return;
-      }
-
-      servers = servs;
-
-      if (isValidString(argv.order)) {
-        servers.sort(comparator(argv.order));
-      }
-
-      populateTable();
-
-      showMenu(`Welcome to SSH Manager, type the name or id of a server\nUsing file: ${file}`);
-
-      cb('done');
-    });
-  },
-
-  (err) => {
-    if (err !== 'done') {
-      console.error(errs);
+  ServerReader.read(file, (err, servs) => {
+    if (err) {
+      console.error(err);
       process.exit(-1);
     }
+
+    servers = servs;
+
+    if (isValidString(argv.order)) {
+      servers.sort(comparator(argv.order));
+    }
+
+    populateTable();
+
+    showMenu(`Welcome to SSH Manager, type the name or id of a server\nUsing file: ${file}`);
   });
 }
 
@@ -234,5 +218,5 @@ function comparator(col) {
 }
 
 function isValidString(value) {
-  return ut.isString(value) && value.trim().length > 0;
+  return typeof value === 'string' && value.trim().length > 0;
 }
