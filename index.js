@@ -45,7 +45,7 @@ const { argv } = yargs.usage('Usage: $0 [options]')
   .alias('o', 'order')
   .nargs('o', 1)
   .string('o')
-  .choices('o', Object.keys(headers))
+  .choices('o', Object.keys(headers).filter((item) => item !== headers.status))
   .describe('o', 'Order the table by the given column')
 
   .alias('s', 'server')
