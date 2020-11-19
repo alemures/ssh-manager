@@ -54,14 +54,14 @@ const { argv } = yargs.usage('Usage: $0 [options]')
   .describe('s', 'Specify the server name or id to connect')
 
   .alias('n', 'nocheck')
-  .describe('n', 'Disable the server connection checkings')
+  .describe('n', 'Disable the server connection checks')
   .nargs('n', 0)
   .boolean('n')
 
   .alias('t', 'timeout')
   .nargs('t', 1)
   .default('t', 500)
-  .describe('t', 'Timeout for server checkings in milliseconds')
+  .describe('t', 'Timeout for server checks in milliseconds')
 
   .help('h')
   .alias('h', 'help')
