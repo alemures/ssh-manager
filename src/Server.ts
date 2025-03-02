@@ -1,7 +1,23 @@
-const net = require('net');
+import net from 'net';
+import { Auth } from './Auth';
 
-class Server {
-  constructor(name, user, host, port, auth) {
+export class Server {
+  static instanceId = 0;
+  name: string;
+  user: string;
+  host: string;
+  port: number;
+  auth: Auth;
+  id: number;
+  reachable: boolean;
+
+  constructor(
+    name: string,
+    user: string,
+    host: string,
+    port: number,
+    auth: Auth
+  ) {
     this.name = name;
     this.user = user;
     this.host = host;
@@ -12,7 +28,7 @@ class Server {
     this.reachable = false;
   }
 
-  checkConnection(timeout, cb) {
+  checkConnection(timeout: number, cb: () => void) {
     const timeoutId = setTimeout(() => socket.destroy(), timeout);
     const socket = net.createConnection(this.port, this.host, () => {
       this.reachable = true;
@@ -24,7 +40,3 @@ class Server {
     socket.on('close', () => cb());
   }
 }
-
-Server.instanceId = 0;
-
-module.exports = Server;

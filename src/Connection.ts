@@ -1,14 +1,21 @@
-const pty = require('node-pty');
+import pty from 'node-pty';
 
-const Auth = require('./Auth');
+import { Auth, AuthType } from './Auth';
+import { Server } from './Server';
 
-class Connection {
-  constructor(server) {
+export class Connection {
+  server: Server;
+  timeout: number;
+
+  constructor(server: Server) {
     this.server = server;
     this.timeout = 2500;
   }
 
-  connect(cb) {
+  connect(cb: {
+    (code: any, signal: any): void;
+    (arg0: any, arg1: any): void;
+  }) {
     console.info('Connecting...');
     let connected = false;
 
@@ -22,7 +29,7 @@ class Connection {
     process.on('SIGINT', ctrlCPressed);
     process.stdout.on('resize', onResize);
 
-    function onData(data) {
+    function onData(data: string | Uint8Array) {
       if (!connected) {
         onConnect();
         connected = true;
@@ -31,7 +38,7 @@ class Connection {
       process.stdout.write(data);
     }
 
-    function onExit(result) {
+    function onExit(result: { exitCode: number; signal?: number }) {
       process.stdin.setRawMode(false);
       process.stdin.removeListener('data', inputToSsh);
       process.removeListener('SIGINT', ctrlCPressed);
@@ -49,7 +56,7 @@ class Connection {
       ssh.resize(process.stdout.columns, process.stdout.rows);
     }
 
-    function inputToSsh(data) {
+    function inputToSsh(data: string) {
       ssh.write(data);
     }
 
@@ -61,7 +68,7 @@ class Connection {
   createSshParams() {
     const params = ['-tt', `${this.server.user}@${this.server.host}`];
 
-    if (this.server.auth.type === Auth.PEM) {
+    if (this.server.auth.type === AuthType.PEM && this.server.auth.pemFile) {
       params.unshift(this.server.auth.pemFile);
       params.unshift('-i');
     }
@@ -69,5 +76,3 @@ class Connection {
     return params;
   }
 }
-
-module.exports = Connection;

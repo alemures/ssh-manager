@@ -1,41 +1,45 @@
-const path = require('path');
-const { expect } = require('chai');
-
-const Auth = require('../lib/Auth');
+import path from 'path';
+import { Auth, AuthType } from '../src/Auth';
 
 describe('Auth', () => {
   describe('constructor', () => {
     it('should create an Auth instance', () => {
-      expect(new Auth(Auth.PASSWORD)).to.be.an.instanceof(Auth);
+      expect(new Auth(AuthType.PASSWORD)).toBeInstanceOf(Auth);
     });
   });
   describe('existsPemFile', () => {
     it('should return true for password auth', (cb) => {
-      const auth = new Auth(Auth.PASSWORD);
+      const auth = new Auth(AuthType.PASSWORD);
       auth.existsPemFile((exists) => {
-        expect(exists).to.be.true;
+        expect(exists).toBe(true);
         cb();
       });
     });
     it('should return true for existing pem files', (cb) => {
-      const auth = new Auth(Auth.PEM, path.join(__dirname, 'resources/file.pem'));
+      const auth = new Auth(
+        AuthType.PEM,
+        path.join(__dirname, 'resources/file.pem')
+      );
       auth.existsPemFile((exists) => {
-        expect(exists).to.be.true;
+        expect(exists).toBe(true);
         cb();
       });
     });
     it('should return false for missing pem files', (cb) => {
-      const auth = new Auth(Auth.PEM, path.join(__dirname, 'resources/file_missing.pem'));
+      const auth = new Auth(
+        AuthType.PEM,
+        path.join(__dirname, 'resources/file_missing.pem')
+      );
       auth.existsPemFile((exists) => {
-        expect(exists).to.be.false;
+        expect(exists).toBe(false);
         cb();
       });
     });
   });
   describe('toString', () => {
     it('should return the type field', () => {
-      const auth = new Auth(Auth.PASSWORD);
-      expect(auth.toString()).to.be.equal(Auth.PASSWORD);
+      const auth = new Auth(AuthType.PASSWORD);
+      expect(auth.toString()).toEqual(AuthType.PASSWORD);
     });
   });
 });
